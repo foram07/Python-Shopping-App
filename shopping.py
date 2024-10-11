@@ -24,17 +24,35 @@ products=[product1, product2, product3, product4]
 
 name=""
 
+
+def viewCat():
+    print("\nCategory are as follows:")
+    for index, item in category.items():
+        print(index,". ",item)
+
 def catlog():
      choice = input("\nSelect the categories from following \n 1. Footwears \n 2. Clothing \n 3. Electronic \n Enter your choice: ")
-     print("\n Product from "+ category[str(choice)]+" are: \n\n")
-     for index, item in enumerate(products):
+     if(int(choice) < 4):
+      print("\n Product from "+ category[str(choice)]+" are: \n\n")
+      for index, item in enumerate(products):
           if(products[index]["catId"]== choice):
             print("-----------------------------")
             print("Product Id: "+(products[index]["id"]))
             print("Product Name: "+(products[index]["name"]))
             print("Product Price: "+(products[index]["price"]))
-     print("-----------------------------")
+            print("-----------------------------")
+     else:
+        print("Invalid choice")
+           
      userMenu()
+
+def viewProduct():
+        for index, item in enumerate(products):
+          print("\n\n-----------------------------")
+          print("Product Id: "+(products[index]["id"]))
+          print("Product Name: "+(products[index]["name"]))
+          print("Product Price: "+(products[index]["price"]))
+        print("-----------------------------")
 
 def viewCart():
     item=len(users[name]["cart"])
@@ -47,9 +65,6 @@ def viewCart():
     userMenu()
 
 def addToCart():
-    #  checkCatlog=input("\n Do you want to check catlog? (Y/N): ")
-    #  if(checkCatlog == "Y"):
-    #      catlog()
      pId = input("Enter the product id: ")
      quantity= input("Enter the quantity: ") 
      item=None
@@ -71,30 +86,40 @@ def addToCart():
 
 
 def removeItem():
-     pId = input("Enter the product id: ")
-     quantity= input("Enter the quantity: ") 
-     for i in products: 
-         if(i["id"]==pId):
+     if(len(users[name]['cart'])!=0):
+      pId = input("Enter the product id: ")
+      quantity= input("Enter the quantity: ") 
+      for i in products: 
+         if(i['id']==pId):
              print("Item to be removed is"+ str(i))
              break
-     j=int(quantity)
-     while j!=0:
-         users[name]["cart"].remove(pId)
-         j = j-1
-     print("The item removed successfully")
+      j=int(quantity)
+      for user in users.values():
+       if 'cart' in user:
+        for cart in user['cart']:
+            while j!=0:
+                user['cart'].remove(cart)
+                j=j-1
+        print(users)
+      print("The item removed successfully")
+     else:
+        print("Your cart is empty") 
      userMenu()
 
 def checkout():
-    item = users[name]["cart"]
-    total = 0 
-    for i in item:
+    if(len(users[name]['cart'])!=0):
+     item = users[name]["cart"]
+     total = 0 
+     for i in item:
        total=total+int(i["price"]) 
-    paymentMode=input("Please select payment mode from following: \n 1. UPI \n 2. PayPal \n 3. Netbanking \n 4. Debit Card \n 5. Credit Card \n Enter choice: ")
+     paymentMode=input("Please select payment mode from following: \n 1. UPI \n 2. PayPal \n 3. Netbanking \n 4. Debit Card \n 5. Credit Card \n Enter choice: ")
       # Display a checkout message that is specific to the selected payment option.
-    print("You will be shortly redirected to make a payment of Rs.", total)
-    # Display a success message.
-    print("Your payment has been successfully processed.")
-    # print("Total is"+str(total))
+     print("You will be shortly redirected to make a payment of Rs.", total)
+     # Display a success message.
+     print("Your payment has been successfully processed.")
+    else:
+        print("Your cart is empty")
+    userMenu()
 
 def logout():
     global name
@@ -106,18 +131,22 @@ def logout():
 
 
 def userMenu():
-     catlog()
-     choice = input("\n\n Select from following option \n 1. View Cart \n 2. Add item to cart \n 3. Remove item from cart \n 4. Checkout \n  5. Logout \n Enter your choice: ")
+    
+     choice = input("\n\n Select from following option \n 1. Catlog \n 2. View Cart \n 3. Add item to cart \n 4. Remove item from cart \n 5. Checkout \n 6. Logout \n Enter your choice: ")
      if(choice == "1"):
-         viewCart()
+         catlog()
      elif(choice == "2"):
-        addToCart()
+           viewCart()
      elif(choice == "3"):
-         removeItem()
+         addToCart()
      elif(choice == "4"):
-        checkout()
+        removeItem()
      elif(choice == "5"):
+         checkout()
+     elif(choice == "6"):
          logout()
+     else:
+         print("Invalid choice")
 
 
 
@@ -166,16 +195,20 @@ def addCategory():
     id = input("\n Enter category id: ")
     name= input("Enter Category name: ")
     category.update({id:name})
+    viewCat()
+    adminMenu()
 
 def removeCategory():
     print()
     id = input("\n Enter category id: ")
     for i in products:
-        if i["catID"] == id:
+        if(i["id"] == id):
             print("removed", i, "from products", id)
             products.remove(i)
 
     del category[id]
+    viewCat()
+    adminMenu()
 
 def addProduct():
     print()
@@ -183,6 +216,7 @@ def addProduct():
     name= input("Enter product name: ")
     catId = input("\n Enter product category id: ")
     price= input("Enter product price: ")
+
 
 
     # Create a new product dictionary.
@@ -196,6 +230,8 @@ def addProduct():
     # Add the new product to the list of products.
     products.append(new_product)
     print("The product has been added successfully!")
+    viewProduct()
+    adminMenu()
 
 def updateProduct():
     print()
@@ -203,14 +239,28 @@ def updateProduct():
     name= input("Enter product name: ")
     catId = input("\n Enter category id: ")
     price= input("Enter product price: ")
+    for index, item in enumerate(products):
+          if(products[index]["id"]== id):
+            print("Update", item, "from products")
+            products[index]["name"] = str(name)
+            products[index]["catId"] = str(catId)
+            products[index]["price"] = str(price)
+    viewProduct()
+    adminMenu()
 
 def removeProduct():
     print()
     id = input("\n Enter product id: ")
+    for i in products:
+        if(i["id"] == id):
+            print("Removed", i, "from products", id)
+            products.remove(i)
+
+    viewProduct()
+    adminMenu()
      
 def adminMenu():
-     catlog()
-     choice = input("\n\n Select from following option \n 1. Add Category \n 2. Remove Category \n 3. Add Product \n 4. Update Product \n  5. Remove Product \n 6. Logout \n Enter your choice: ")
+     choice = input("\n\n Select from following option \n 1. Add Category \n 2. Remove Category \n 3. Add Product \n 4. Update Product \n 5. Remove Product \n6. Logout \n Enter your choice: ")
      if(choice == "1"):
          addCategory()
      elif(choice == "2"):
@@ -220,9 +270,11 @@ def adminMenu():
      elif(choice == "4"):
          updateProduct()
      elif(choice == "5"):
-         removeProduct
+         removeProduct()
      elif(choice == "6"):
          logout()
+     else:
+         print("Invalid choice")
 
 
 
